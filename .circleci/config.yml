@@ -10,9 +10,9 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - checkout
-      - run: dotnet restore
-      - run: dotnet build
-      - run: dotnet test TeamService.Tests
+      #- run: dotnet restore
+      #- run: dotnet build
+      - run: sh build.sh
       - setup_remote_docker:   # (2)
           docker_layer_caching: true # (3)
 
