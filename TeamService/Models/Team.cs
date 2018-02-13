@@ -8,7 +8,7 @@ namespace TeamService.Models
     {
         public string Name { get; set; }
         public Guid ID { get; set; }
-        public IEnumerable<Member> Members { get; set; }
+        public ICollection<Member> Members { get; set; }
 
         public Team()
         {

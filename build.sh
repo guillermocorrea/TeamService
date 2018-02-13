@@ -19,10 +19,10 @@ cd TeamService.Tools
 dotnet minicover uninstrument --workdir ../
 
 # Create html reports inside folder coverage-html
-dotnet minicover htmlreport --workdir ../ --threshold 75
+dotnet minicover htmlreport --workdir ../ --threshold 85
 
 # Print console report
 # This command returns failure if the coverage is lower than the threshold
-dotnet minicover report --workdir ../ --threshold 75
+dotnet minicover report --workdir ../ --threshold 85
 
 cd ..
