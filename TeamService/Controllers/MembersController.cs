@@ -106,13 +106,10 @@ namespace TeamService.Controllers
         [Route("/members/{memberId}/team")]
         public IActionResult GetTeamForMember(Guid memberId)
         {
-            var teamId = GetTeamIdForMember(memberId);
-            if (teamId != Guid.Empty)
+            var team = GetTeamForMemberHelper(memberId);
+            if (team != null)
             {
-                return this.Ok(new
-                {
-                    TeamID = teamId
-                });
+                return this.Ok(team);
             }
             else
             {
@@ -120,17 +117,17 @@ namespace TeamService.Controllers
             }
         }
 
-        private Guid GetTeamIdForMember(Guid memberId)
+        private Team GetTeamForMemberHelper(Guid memberId)
         {
             foreach (var team in repository.List())
             {
                 var member = team.Members.FirstOrDefault(m => m.ID == memberId);
                 if (member != null)
                 {
-                    return team.ID;
+                    return team;
                 }
             }
-            return Guid.Empty;
+            return null;
         }
     }
 }

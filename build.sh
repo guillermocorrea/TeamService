@@ -4,14 +4,14 @@ dotnet build
 cd TeamService.Tools
 
 # Instrument assemblies inside 'test' folder to detect hits for source files inside 'src' folder
-dotnet minicover instrument --workdir ../ --assemblies TeamService.Tests/**/bin/**/*.dll --sources TeamService/**/*.cs 
+dotnet minicover instrument --workdir ../ --assemblies test/**/bin/**/*.dll --sources TeamService/**/*.cs 
 
 # Reset hits count in case minicover was run for this project
 dotnet minicover reset
 
 cd ..
 
-for project in TeamService.Tests/*.csproj; do dotnet test --no-build $project; done
+for project in test/**/*.csproj; do dotnet test --no-build $project; done
 
 cd TeamService.Tools
 

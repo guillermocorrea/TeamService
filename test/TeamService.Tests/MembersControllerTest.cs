@@ -254,7 +254,7 @@ namespace TeamService.Tests
             newMember.LastName = "Smith";
             controller.CreateMember(newMember, teamId);
 
-            var result = (controller.GetTeamForMember(Guid.NewGuid()) as ObjectResult).Value;
+            var result = (controller.GetTeamForMember(Guid.Empty) as IActionResult);
             Assert.True(result is NotFoundResult);
         }
     }
