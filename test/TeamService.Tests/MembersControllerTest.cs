@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TeamService.Controllers;
+using TeamService.LocationClient;
 using TeamService.Models;
 using TeamService.Persistence;
 using Xunit;
@@ -17,7 +19,8 @@ namespace TeamService.Tests
         public void CreateMemberAddsTeamToList()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestController", teamId);
@@ -35,7 +38,8 @@ namespace TeamService.Tests
         public void CreateMembertoNonexistantTeamReturnsNotFound()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
 
@@ -47,10 +51,11 @@ namespace TeamService.Tests
         }
 
         [Fact]
-        public void GetExistingMemberReturnsMember()
+        public async Task GetExistingMemberReturnsMember()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
@@ -62,7 +67,7 @@ namespace TeamService.Tests
             newMember.LastName = "Smith";
             controller.CreateMember(newMember, teamId);
 
-            Member member = (Member)(controller.GetMember(teamId, memberId) as ObjectResult).Value;
+            Member member = (Member)(await controller.GetMember(teamId, memberId) as ObjectResult).Value;
             Assert.Equal(member.ID, newMember.ID);
         }
 
@@ -70,7 +75,8 @@ namespace TeamService.Tests
         public void GetMembersReturnsMembers()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
@@ -98,7 +104,8 @@ namespace TeamService.Tests
         public void GetMembersForNewTeamIsEmpty()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
@@ -112,33 +119,36 @@ namespace TeamService.Tests
         public void GetMembersForNonExistantTeamReturnNotFound()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             var result = controller.GetMembers(Guid.NewGuid());
             Assert.True(result is NotFoundResult);
         }
 
         [Fact]
-        public void GetNonExistantTeamReturnsNotFound()
+        public async Task GetNonExistantTeamReturnsNotFound()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
-            var result = controller.GetMember(Guid.NewGuid(), Guid.NewGuid());
+            var result = await controller.GetMember(Guid.NewGuid(), Guid.NewGuid());
             Assert.True(result is NotFoundResult);
         }
 
         [Fact]
-        public void GetNonExistantMemberReturnsNotFound()
+        public async Task GetNonExistantMemberReturnsNotFound()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
             var debugTeam = repository.Add(team);
 
-            var result = controller.GetMember(teamId, Guid.NewGuid());
+            var result = await controller.GetMember(teamId, Guid.NewGuid());
             Assert.True(result is NotFoundResult);
         }
 
@@ -146,7 +156,8 @@ namespace TeamService.Tests
         public void UpdateMemberOverwrites()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
@@ -176,7 +187,8 @@ namespace TeamService.Tests
         public void UpdateMemberToNonexistantMemberReturnsNoMatch()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestController", teamId);
@@ -199,7 +211,8 @@ namespace TeamService.Tests
         public void UpdateNonexistantMemberReturnsNoMatch()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestController", teamId);
@@ -222,7 +235,8 @@ namespace TeamService.Tests
         public void GetTeamForExistingMemberReturnsMember()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);
@@ -242,7 +256,8 @@ namespace TeamService.Tests
         public void GetTeamForNonExistingMemberReturnsNotFound()
         {
             ITeamRepository repository = new TestMemoryTeamRepository();
-            MembersController controller = new MembersController(repository);
+            ILocationClient _locationClient = new MemoryLocationClient();
+            MembersController controller = new MembersController(repository, _locationClient);
 
             Guid teamId = Guid.NewGuid();
             Team team = new Team("TestTeam", teamId);

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using TeamService.LocationClient;
 using TeamService.Models;
 using TeamService.Persistence;
 
@@ -10,17 +13,22 @@ namespace TeamService.Controllers
     [Route("/teams/{teamId}/[controller]")]
     public class MembersController : Controller
     {
-        ITeamRepository repository;
+        //private readonly IMapper _mapper;
+        private readonly ITeamRepository _repository;
+        private readonly ILocationClient _locationClient;
 
-        public MembersController(ITeamRepository repo)
+        public MembersController(ITeamRepository repo, //IMapper mapper,
+            ILocationClient locationClient)
         {
-            repository = repo;
+            _repository = repo;
+            //_mapper = mapper;
+            _locationClient = locationClient;
         }
 
         [HttpGet]
         public virtual IActionResult GetMembers(Guid teamID)
         {
-            Team team = repository.Get(teamID);
+            Team team = _repository.Get(teamID);
 
             if (team == null)
             {
@@ -32,16 +40,15 @@ namespace TeamService.Controllers
             }
         }
 
-
         [HttpGet]
         [Route("/teams/{teamId}/[controller]/{memberId}")]
-        public virtual IActionResult GetMember(Guid teamID, Guid memberId)
+        public async virtual Task<IActionResult> GetMember(Guid teamID, Guid memberId)
         {
-            Team team = repository.Get(teamID);
+            Team team = _repository.Get(teamID);
 
             if (team == null)
             {
-                return this.NotFound();
+                return NotFound();
             }
             else
             {
@@ -49,11 +56,21 @@ namespace TeamService.Controllers
 
                 if (q.Count() < 1)
                 {
-                    return this.NotFound();
+                    return NotFound();
                 }
                 else
                 {
-                    return this.Ok(q.First());
+                    //var member =_mapper.Map<LocatedMember>(q.First());
+                    //locatedMember.LastLocation = await _locationClient.GetLatestForMember(locatedMember.ID);
+                    var member = q.First();
+                    var locatedMember = new LocatedMember()
+                    {
+                        ID = member.ID,
+                        FirstName = member.FirstName,
+                        LastName = member.LastName,
+                        LastLocation = await _locationClient.GetLatestForMember(member.ID)
+                    };
+                    return Ok(locatedMember);
                 }
             }
         }
@@ -62,7 +79,7 @@ namespace TeamService.Controllers
         [Route("/teams/{teamId}/[controller]/{memberId}")]
         public virtual IActionResult UpdateMember([FromBody]Member updatedMember, Guid teamID, Guid memberId)
         {
-            Team team = repository.Get(teamID);
+            Team team = _repository.Get(teamID);
 
             if (team == null)
             {
@@ -88,7 +105,7 @@ namespace TeamService.Controllers
         [HttpPost]
         public virtual IActionResult CreateMember([FromBody]Member newMember, Guid teamID)
         {
-            Team team = repository.Get(teamID);
+            Team team = _repository.Get(teamID);
 
             if (team == null)
             {
@@ -119,7 +136,7 @@ namespace TeamService.Controllers
 
         private Team GetTeamForMemberHelper(Guid memberId)
         {
-            foreach (var team in repository.List())
+            foreach (var team in _repository.List())
             {
                 var member = team.Members.FirstOrDefault(m => m.ID == memberId);
                 if (member != null)
